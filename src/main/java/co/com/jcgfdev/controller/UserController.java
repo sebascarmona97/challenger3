@@ -19,10 +19,13 @@ import co.com.jcgfdev.exception.ErrorResponse;
 import co.com.jcgfdev.exception.ResourceNotFoundException;
 import co.com.jcgfdev.model.User;
 import co.com.jcgfdev.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Tag(name = "User API", description = "User management APIs")
 @RestController
 @RequestMapping("/users")
 @Validated
@@ -31,6 +34,7 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
+	@Operation(summary = "Create a new user")
 	@PostMapping
 	public Mono<ResponseEntity<Object>> createUser(@Valid @RequestBody User user) {
 	    return userService.createUser(user)
@@ -44,6 +48,7 @@ public class UserController {
 	            );
 	}
 
+	@Operation(summary = "Get all users")
 	@GetMapping
     public Flux<User> getAllUsers() {
         return userService.getAllUsers()
@@ -52,18 +57,18 @@ public class UserController {
     }
 
 	@ExceptionHandler(WebExchangeBindException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ErrorResponse handleValidationExceptions(WebExchangeBindException ex) {
-		String message = ex.getBindingResult().getAllErrors().stream()
-				.map(error -> error.getDefaultMessage())
-				.collect(Collectors.joining(", "));
-		return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
-	}
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationExceptions(WebExchangeBindException ex) {
+        String message = ex.getBindingResult().getAllErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+    }
 
-	@ExceptionHandler(Exception.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public ErrorResponse handleException(Exception ex) {
-	    return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
-	}
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleException(Exception ex) {
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
+    }
 
 }
